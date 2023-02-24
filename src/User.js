@@ -1,22 +1,18 @@
-import React from 'react';
-import axios from 'axios';
-import {useAsync} from 'react-async';
-
-async function getUser({id}) { //프로미스를 반환하는 함수의 파라미터를 객체 형태로 주어야 함
-    const response = await axios.get(
-        `https://jsonplaceholder.typicode.com/users/${id}`
-    );
-    return response.data;
-}
+import React, {useEffect} from 'react';
+import { useUsersState, useUsersDispatch, getUser } from './UsersContext';
 
 function User({ id }){
-    const { data:user, error, isLoading } = useAsync({
-        promiseFn: getUser,
-        id,
-        watch: id
-    });
+    const state = useUsersState();
+    const dispatch = useUsersDispatch();
 
-    if(isLoading) return <div>로딩중..</div>;
+    //id값이 바뀔 때 마다 getUser()함수를 호출해주도록 하는 useEffect
+    useEffect(()=>{
+        getUser(dispatch, id);
+    }, [dispatch, id]);
+    
+    const {data:user, loading, error} = state.user;
+
+    if(loading) return <div>로딩중..</div>;
     if(error) return <div>에러 발생</div>;
     if(!user) return null;
 
